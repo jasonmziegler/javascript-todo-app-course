@@ -1,14 +1,21 @@
-// Week 2 JavaScript index.js
+// Week 3 JavaScript index.js
+//
 
-// Create a todoApp object
-
-// use the saved data with our object
+// Internal Todos for day 4
+// 
+// have the have UI show complete status
+// method to set todo as completed
+// clear all complete todos 
+// add a clearCompleteTodos method to our object
+// add a handleClearCompleteTodos function to our app
+// add an eventlistener to tour app 
 
 const todoApp = {
   "todos": [],
   "addTodo": function (todo) {
     console.log("This method will add a todo to our todoApp object.");
-    this.todos.push(todo);
+    // {complete: false, todoTitle: todo}
+    this.todos.push({complete: false, title: todo});
     this.saveTodos(this.todos);
   },
   "deleteTodo": function (index) { 
@@ -35,11 +42,7 @@ const todoApp = {
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "Delete";
       deleteBtn.classList.add("delete-btn");
-      // deleteBtn.addEventListener("click", function() {
-      //   todos.splice(i, 1);
-      //   showTodos();
-      // });
-      li.textContent = i + ": " + todo;
+      li.textContent = (todo.complete) ? "[x]" + " " + i + ": " + todo.title : "[ ]" + " " + i + ": " + todo.title;
       li.appendChild(deleteBtn);
       todoListElement.appendChild(li);
     });
@@ -48,90 +51,27 @@ const todoApp = {
     this.todos = [];
     this.saveTodos();
   },
-  "arrowFunction": function () {
-    console.log(this);
+  "clearCompleteTodos": function() {
+    this.todos = this.todos.filter( todo => !todo.complete);
+    this.saveTodos();
+  },
+  "toggleComplete": function (index) { 
+    (this.todos[index].complete) ? this.todos[index].complete = false : this.todos[index].complete = true;
+    console.log(this.todos[index].complete);
+    this.saveTodos();
+    this.showTodos();
   }
 }
-
-// let addDemo = todoApp.addTodo;
-// addDemo("add Demo test");
-
-// Attach an event listener to the button
-
-// DATA
-
-// retrieve list and if (list) then save in variable todos
-// else set todos to an empty array
-// let savedData = localStorage.getItem("todoData");
-// let todos = (savedData) ? JSON.parse(savedData) : [];
-// localStorage.setItem("userName","Jason");
-// console.log("User Name: ", localStorage.getItem('userName'));
-
-// DATA FUNCTIONS
-// function saveList need to be passed todos
-// function saveList(todos){
-//   localStorage.setItem("todoData", JSON.stringify(todos));
-//   console.log("List Saved.");
-// }
-// retrieveList return the list
-// function retrieveList(){
-//   console.log("List Retrieved.");
-//   return JSON.parse(localStorage.getItem("todoData"));
-// }
-
-// clearAllTodos function
-
-// function clearAllTodos(todos) {
-//   console.log("Todos Cleared.");
-//   // // save the todos
-//   todos = [];
-//   saveList(todos);
-// }
-
-// handle clear all todos function to combine the 
-// // clearAllTodos ()
-// // show the todos
+// can we do all this in one function so we don't repeat showTodos()
 function handleClearAllTodos() {
   todoApp.clearAllTodos();
   todoApp.showTodos();
 }
-// APP FUNCTIONS
 
-// function addTodo(todo) {
-//   // console.log("Add Todo");
-//   todos.push(todo);
-//   saveList(todos);
-// }
-
-// function removeTodo(index) {
-//   // console.log("Remove Todo");
-//   const removedTodo = todos.splice(index, 1)[0];
-//   saveList(todos);
-//   return removedTodo;
-
-// }
-
-// function showTodos() {
-//   todos = retrieveList();
-//   todoListElement.innerHTML = "";
-//   todos.forEach(function(todo, i) {
-//     const li = document.createElement("li");
-//     //TODO: Replace with an id `` string interpolation, template literals. todo-item-1
-//     li.classList.add("todo-item");
-//     li.setAttribute("data-id", i);
-//     const deleteBtn = document.createElement("button");
-//     deleteBtn.textContent = "Delete";
-//     deleteBtn.classList.add("delete-btn");
-//     // deleteBtn.addEventListener("click", function() {
-//     //   todos.splice(i, 1);
-//     //   showTodos();
-//     // });
-//     li.textContent = i + ": " + todo;
-//     li.appendChild(deleteBtn);
-//     todoListElement.appendChild(li);
-
-//   })
-// }
+function handleClearCompleteTodos() { 
+  todoApp.clearCompleteTodos();
+  todoApp.showTodos();
+}
 
 function handleAddTodo(todoText) {
   todoApp.addTodo(todoText);
@@ -145,6 +85,7 @@ let todoListElement = document.querySelector("#todo-list");
 let addTodoInput = document.querySelector("#todo-input");
 let addTodoButton = document.querySelector("#todo-add-button");
 let clearTodosButton = document.querySelector("#todo-clear-button");
+let clearCompleteTodosButton = document.querySelector("#todo-clearComplete-button");
 console.log("Todo List Element", todoListElement);
 todoApp.showTodos();
 
@@ -156,6 +97,10 @@ addTodoButton.addEventListener("click", function() {
 
 clearTodosButton.addEventListener("click", function() {
   handleClearAllTodos();
+})
+
+clearCompleteTodosButton.addEventListener("click", function() {
+  handleClearCompleteTodos();
 })
 
 todoListElement.addEventListener("click", function(event) {
@@ -176,23 +121,3 @@ todoListElement.addEventListener("click", function(event) {
   // then remove the nearest element with the todo-item 
 })
 
-// let running = true; 
-// while (running) {
-//   let userInput = prompt("Todo App: type 'add', 'remove', 'show', or 'quit'");
-
-  // if (userInput === "add") {    
-  //   let newTodo = prompt("What do you need to do?");
-  //   addTodo(newTodo);
-  // } else if (userInput === "remove") {
-  //   let todoIndex = prompt("Which todo do you want to delete?") - 1;
-  //   console.log("The follow todo has been removed: ", removeTodo(todoIndex));
-  // } else if (userInput === "show") { 
-  //   showTodos();
-  // } else if (userInput === "quit") {
-  //   running = false;
-  // } else {
-  //   console.log("No comprende. Please try again.");
-  // }
-// }
-
-// console.log("Program Terminated.");
