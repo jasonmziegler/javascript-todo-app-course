@@ -15,8 +15,13 @@
 // should an item be able to self generate an id?
 
 // TODO OBJECT 
-function TodoItem(title, complete = false) { 
+function TodoItem(title, complete = false, id) { 
   // if no Id passed we will need to create an id - lookup how to generate a unique id
+  if (id) {
+    this.id = id;
+  } else {
+    return "Needs Id.";
+  }
   this.title = title;
   this.complete = complete;
 }
@@ -38,12 +43,21 @@ TodoItem.prototype.updateTitle = function(todoTitle) {
 const todoModel = {
   info: "This is the Todo Model Object.",
   todos: [],
+  // Create a lastId so that we don't give a TodoItem the same id
+  lastIdCount: 1000,
   filter: "none",
-  addTodo(todo, todoComplete = false) {
+  addTodo(todo, todoComplete = false, todoId) {
     const todos = this.todos;
     // TODO: add data validation so can't add a blank todo
-    // here we won't pass an id? or we need to generate an id here and pass to the todo
-    let newTodoItem = new TodoItem(todo, todoComplete);
+    // here we account for if this is a retreived todo or a newTodo
+    let newTodoId;
+    if (todoId) { 
+      newTodoId = todoId;
+    } else {
+      newTodoId = ++this.lastIdCount;
+    }
+
+    let newTodoItem = new TodoItem(todo, todoComplete, newTodoId);
     todos.push(newTodoItem);
     this.saveTodos(todos);
   },
@@ -63,13 +77,19 @@ const todoModel = {
     // doing this I lose the context of this
     const addTodo = this.addTodo.bind(this);
     //const todos = this.todos;
+    let lastTodoId;
     if (savedData) {
       const tempData = JSON.parse(savedData);
       tempData.forEach(function(todo) {
         // TODO: change complete to isComplete
-        addTodo(todo.title, todo.complete);
+        lastTodoId = todo.id;
+        addTodo(todo.title, todo.complete, todo.id);
+
       }); 
     } 
+    if (lastTodoId) {
+      this.lastIdCount = lastTodoId;
+    }
   },
   "clearAllTodos": function() {
     this.todos = [];
@@ -142,13 +162,13 @@ const todoView = {
         //TODO: Replace with an id `` string interpolation, template literals. todo-item-1
         li.classList.add("todo-item");
         // TODO: this needs to be set to todo.id
-        li.setAttribute("data-id", i);
+        li.setAttribute("data-id", todo.id);
         
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = todo.complete;
         // TODO: this needs to be set to todo.id
-        checkbox.setAttribute("data-index", i);
+        checkbox.setAttribute("data-index", todo.id);
         checkbox.classList.add("complete-checkbox");
         
         const title = document.createElement("span");
@@ -303,15 +323,32 @@ const todoController = {
         if (listItem) {
           // here we are deleting the do at "index" of dataset.id
           // TODO:Get the index of the todo with the dataset.id we want to delete.
-          self.model.deleteTodo(parseInt(listItem.dataset.id));
+          // we need a function to return the index of a todo with the id of x
+          const deleteItemIndex = self.model.todos.findIndex(function(todo) {
+            return todo.id === parseInt(listItem.dataset.id);
+          });
+
+          if (deleteItemIndex !== -1) {
+            self.model.deleteTodo(deleteItemIndex);
           // remove element from UI
           listItem.remove();
+          } else {
+            console.error("Delete Item: Id not found.")
+          }
         }
       } else if (event.target.classList.contains("complete-checkbox")) {
-        const itemCheckbox = parseInt(event.target.dataset.index);
+        const itemCheckboxIndex = self.model.todos.findIndex(function(todo) {
+          return todo.id === parseInt(event.target.dataset.index);
+        })
+
         // here we are toggling  the todo at "index" of dataset.id
           // TODO:Get the index of the todo with the dataset.id we want to toggle.
-        self.model.toggleComplete(itemCheckbox);
+        if (itemCheckboxIndex !== -1) {
+          self.model.toggleComplete(itemCheckboxIndex);
+        } else {
+          console.error("Todo not found.")
+        }
+        
         self.view.showTodos(self.model.filterTodos(self.model.todos));
       }
     })
